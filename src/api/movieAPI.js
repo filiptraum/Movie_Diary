@@ -1,5 +1,5 @@
 export default class MovieAPI {
-  __urlAPI = 'http://www.omdbapi.com/?t=';
+  __urlAPI = 'https://www.omdbapi.com/?t=';
   __keyAPI = '&apikey=e11befaa';
 
   __transformToCorrectData = (data, symb) => {
