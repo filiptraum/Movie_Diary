@@ -1,0 +1,84 @@
+.searchPanel {
+    margin-top: 120px;
+
+    .content {
+        margin-bottom: 20px;
+
+        .box {
+            display: flex;
+            justify-content: center;
+            position: relative;
+
+            @media screen and (max-width: 500px) {
+                text-align: center;
+            }
+
+            & > p {
+                text-align: center;
+                line-height: 24px;
+                letter-spacing: 1px;
+            }
+        }
+        
+        .block {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 50px;
+
+            @media screen and (max-width: 500px) {
+                flex-direction: column;
+            }
+
+            input {
+                border: none;
+                flex: 0 1 600px;
+                padding: 0 20px;
+                letter-spacing: 1px;
+                height: 50px;
+                border-radius: 30px 0px 0px 30px;
+                transition: .25s linear;
+
+                @media screen and (max-width: 500px) {
+                    flex: auto;
+                    width: 100%;
+                    margin-bottom: 10px;
+                    text-align: center;
+                    border-radius: 30px;
+                }
+
+                &:hover,
+                &:focus {
+                    box-shadow: 0px 0px 10px white;
+                }
+            }
+
+            & > button {
+                height: 50px;
+                padding: 0 35px;
+                border-radius: 0px 30px 30px 0px;
+                border: none;
+                background-color: white;
+                margin-left: 7px;
+                letter-spacing: 3px;
+                transition: .25s linear;
+
+                @media screen and (max-width: 500px) {
+                    width: 75%;
+                    margin-left: 0;
+                    text-align: center;
+                    border-radius: 30px;
+                }
+
+                @media screen and (max-width: 400px) {
+                    width: 100%
+                }
+
+                &:hover,
+                &:focus {
+                    box-shadow: 0px 0px 10px white;
+                }
+            }
+        }
+    }
+}

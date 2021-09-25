@@ -1,0 +1,17 @@
+.movieFilters {
+    margin-top: 70px;
+
+    .container {
+        align-items: flex-start;
+
+        @media screen and (max-width: 302px) {
+            align-items: center;
+            
+            .content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    }
+}

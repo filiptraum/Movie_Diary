@@ -1,0 +1,21 @@
+.footer {
+    height: 50px;
+    background-color: rgba(50, 50, 50, 0.26);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    letter-spacing: 3px;
+    text-align: center;
+
+    a {
+        color: inherit;
+        transition: .25s linear;
+        border-bottom: 1px solid transparent;
+
+        &:hover,
+        &:focus {
+            color: rgba(49, 255, 76, 0.36);
+            border-bottom-color: rgba(49, 255, 76, 0.56);
+        }
+    }
+}
