@@ -3,12 +3,12 @@ import {Link} from "react-router-dom";
 
 import './movie-item.scss';
 
-const MovieItem = ({moviesData, onCheckDetails}) => {
-    const {Poster, linkTo} = moviesData;
+const MovieItem = ({movieData, onCheckDetails}) => {
+    const {Poster, linkTo} = movieData;
 
     return (
         <Link 
-            to = {`/${linkTo}`}
+            to = {`/details/${linkTo}`}
             className = 'movieItem'
             onClick = {() => onCheckDetails(linkTo)}
         >

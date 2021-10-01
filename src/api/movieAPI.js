@@ -2,7 +2,7 @@ export default class MovieAPI {
   __urlAPI = 'https://www.omdbapi.com/?t=';
   __keyAPI = '&apikey=e11befaa';
 
-  __transformToCorrectData = (data, symb) => {
+  transformToCorrectData = (data, symb) => {
     let correctData = '';
 
     for (let i = 0; i < data.length; i++) {

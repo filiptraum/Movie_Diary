@@ -5,7 +5,7 @@ import Container from '../../hoc/container';
 
 import './search-panel.scss';
 
-const SearchPanel = ({searchValue, onChangeValue, onSearchMovie, selectedMovie, onCheckDetails, searchMessageStatus}) => {
+const SearchPanel = ({searchValue, onSwitch, onSearchMovie, selectedMovie, onCheckDetails, searchMessageStatus}) => {
     return (
         <Container classNames = 'searchPanel'>
             <div className = 'block'>
@@ -13,16 +13,16 @@ const SearchPanel = ({searchValue, onChangeValue, onSearchMovie, selectedMovie, 
                     type = 'text'
                     placeholder = 'Movie name...'
                     value = {searchValue}
-                    onChange = {onChangeValue}
+                    onChange = {e => { onSwitch('searchValue', e.target.value) }}
                 />
                 <button onClick = {onSearchMovie}>Search</button>
             </div>
 
             <div className = 'box'>
                 {
-                    (selectedMovie.linkTo.length > 0)
+                    (selectedMovie.linkTo !== null)
                     ? <MovieItem 
-                        moviesData = {selectedMovie}
+                        movieData = {selectedMovie}
                         onCheckDetails = {onCheckDetails}
                     />
                     : <p>{searchMessageStatus}</p>

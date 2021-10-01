@@ -5,8 +5,8 @@ import Container from '../../hoc/container';
 
 import './movie-details.scss';
 
-const MovieDetails = ({movieData, statuses, onSwitchMovieStatus}) => {
-    const {Poster, linkTo} = movieData;
+const MovieDetails = ({movieData, onSwitchMovieStatus, onChangeMovieRating}) => {
+    const {Poster, statuses, ratings} = movieData;
 
     let keys = [
         'Title',
@@ -48,9 +48,10 @@ const MovieDetails = ({movieData, statuses, onSwitchMovieStatus}) => {
             {content}
                     
             <MovieStatusSwitches
-                linkTo = {linkTo}
                 statuses = {statuses}
                 onSwitchMovieStatus = {onSwitchMovieStatus}
+                ratings = {ratings}
+                onChangeMovieRating = {onChangeMovieRating}
             />
         </Container>
     );

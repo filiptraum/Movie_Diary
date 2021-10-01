@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {BrowserRouter as Router, Switch, Route} from "react-router-dom";
+import {BrowserRouter as Router, Switch, Route, Redirect} from "react-router-dom";
 
 import Header from '../header/header';
 import MovieFilters from '../movie-filters/movie-filters';
@@ -14,18 +14,8 @@ import './app.scss';
 
 export default class App extends Component {
   state = {
-    pageSwitchesItemsData: [
-      {text: 'main page', keyValue: ''},
-      {text: 'find a movie', keyValue: 'searching'}
-    ],
     page: JSON.parse(localStorage.getItem('state')) ? JSON.parse(localStorage.getItem('state')).page : '',
 
-    movieFiltersItemsData: [
-      {text: 'all movies', keyValue: 'all'},
-      {text: 'favorite', keyValue: 'favorite'},
-      {text: 'watched', keyValue: 'watched'},
-      {text: 'next to watch', keyValue: 'next'}
-    ],
     movieFilter: 'all',
 
     moviesData: JSON.parse(localStorage.getItem('state')) ? JSON.parse(localStorage.getItem('state')).moviesData : [],
@@ -34,20 +24,28 @@ export default class App extends Component {
     searchMessageStatus: JSON.parse(localStorage.getItem('state'))
                          ? JSON.parse(localStorage.getItem('state')).searchMessageStatus : 'Enter the name of the movie...',
     
-    selectedMovie: JSON.parse(localStorage.getItem('state')) ? JSON.parse(localStorage.getItem('state')).selectedMovie : {linkTo: ''}
+    selectedMovie: JSON.parse(localStorage.getItem('state')) ? JSON.parse(localStorage.getItem('state')).selectedMovie : {linkTo: null}
   }
+
+  redirectionDone = false;
 
   onSwitch = (keyValue, value) => {
-    this.setState({
-      [keyValue]: value,
-      selectedMovie: {linkTo: ''},
-      searchValue: '',
-      searchMessageStatus: 'Enter the name of the movie...'
+    this.setState(prevState => {
+      if (keyValue === 'page') {
+        return {
+          [keyValue]: value,
+          selectedMovie: {linkTo: null},
+          searchValue: '',
+          searchMessageStatus: 'Enter the name of the movie...'
+        }
+      }else if ((keyValue === 'searchValue') || (keyValue === 'movieFilter')) {
+        return {
+          [keyValue]: value
+        }
+      }else {
+        return prevState
+      }
     });
-  }
-
-  onChangeValue = e => {
-    this.setState({searchValue: e.target.value})
   }
 
   onSearchMovie = () => {
@@ -56,34 +54,65 @@ export default class App extends Component {
     if (searchValue.length > 0) {
       const movieAPI = new MovieAPI();
 
-      const url = movieAPI.__transformToCorrectData(searchValue.toLowerCase(), '+');
-      const linkTo = movieAPI.__transformToCorrectData(searchValue.toLowerCase(), '_');
+      const url = movieAPI.transformToCorrectData(searchValue.toLowerCase(), '+');
 
       movieAPI.getResource(url)
-        .then(movie => {
-          if (movie.Response === 'True') {
+        .then(data => {
+          if (data.Response === 'True') {
             this.setState(prevState => {
-              const newMovie = {
-                ...movie,
-                linkTo,
-                statuses: [
-                  {text: 'favorite', keyValue: 'favorite', status: false},
-                  {text: 'watched', keyValue: 'watched', status: false},
-                  {text: 'next to watch', keyValue: 'next', status: false},
-                  {text: 'delete', keyValue: 'delete', status: true}
-                ]
-              };
-
-              const isMovieSelected = prevState.moviesData.find(movie => movie.Poster === newMovie.Poster);
+              const isMovieSelected = prevState.moviesData.find(movie => movie.Poster === data.Poster);
 
               if (isMovieSelected === undefined) {
-                 return {
-                   moviesData: [
-                     ...prevState.moviesData,
-                     newMovie
-                   ],
-                   selectedMovie: newMovie
-                 }
+                const {
+                  Poster,
+                  Title,
+                  Released,
+                  Genre,
+                  Runtime,
+                  Actors,
+                  Director,
+                  Production,
+                  Country
+                } = data;
+
+                const movieData = {
+                  Poster,
+                  Title,
+                  Released,
+                  Genre,
+                  Runtime,
+                  Actors,
+                  Director,
+                  Production,
+                  Country
+                };
+
+                const linkTo = movieAPI.transformToCorrectData(Title.toLowerCase(), '_');
+
+                const calcLengthByKeyFromMoviesData = key => {
+                  return (this.state.moviesData.filter(item => {
+                    return item.statuses.find(status => status.keyValue === key).status
+                }).length + 1);
+  }
+
+                const newMovie = {
+                  ...movieData,
+                  linkTo,
+                  ratings: {
+                    favorite: calcLengthByKeyFromMoviesData('favorite'),
+                    next: calcLengthByKeyFromMoviesData('next')
+                  },
+                  statuses: [
+                    {text: 'favorite', keyValue: 'favorite', status: false},
+                    {text: 'watched', keyValue: 'watched', status: false},
+                    {text: 'next to watch', keyValue: 'next', status: false},
+                    {text: 'delete', keyValue: 'delete', status: true}
+                  ]
+                };
+
+                return {
+                  selectedMovie: newMovie
+                }
               }else {
                 return {
                   selectedMovie: isMovieSelected
@@ -92,34 +121,44 @@ export default class App extends Component {
             });
           }else {
             this.setState({
-              selectedMovie: {linkTo: ''},
-              searchMessageStatus: 'You entered the wrong name of the film or the film is not in the API...'
+              searchMessageStatus: 'You entered the wrong name of the movie or the movie is not in the API...'
             });
           }
         });
     }else {
       this.setState({
-        selectedMovie: {linkTo: ''},
         searchMessageStatus: 'You haven\'t entered anything!...'
       });
     }
   }
 
-  onCheckDetails = (linkTo) => {
+  onCheckDetails = linkTo => {
     document.body.scrollTop = document.documentElement.scrollTop = 0;
 
-    const selectedMovie = this.state.moviesData.find(movie => movie.linkTo === linkTo)
-    
-    this.setState({
-      page: 'details',
-      selectedMovie
+    this.setState(prevState => {
+      const isMovieSelected = this.state.moviesData.find(movie => movie.linkTo === linkTo);
+
+      if (isMovieSelected === undefined) {
+          return {
+            moviesData: [
+              prevState.selectedMovie,
+              ...prevState.moviesData
+            ],
+            page: 'details'
+          }
+      }else {
+        return {
+          page: 'details',
+          selectedMovie: isMovieSelected
+        }
+      }
     });
   }
 
   onSwitchMovieStatus = (keyValue, status) => {
     if (keyValue !== 'delete') {
       this.setState(prevState => {
-        const updatedStatus = prevState.selectedMovie.statuses.map(statusItem => {
+        const updatedStatuses = prevState.selectedMovie.statuses.map(statusItem => {
           if (statusItem.keyValue === keyValue) {
             return {...statusItem, status}
           }else {
@@ -130,7 +169,7 @@ export default class App extends Component {
         const updatedMovie = {
           ...prevState.selectedMovie,
           statuses: [
-            ...updatedStatus
+            ...updatedStatuses
           ]
         };
 
@@ -159,11 +198,43 @@ export default class App extends Component {
 
         return {
           moviesData,
-          selectedMovie: {linkTo: ''},
-          page: ''
+          page: '',
+          selectedMovie: {linkTo: null}
         }
       });
     }
+  }
+
+  onChangeMovieRating = (keyValue, value) => {
+    this.setState(prevState => {
+      let newValue = value;
+
+      if (value <= 0) {
+        newValue = 1;
+      }else if(value >= 100) {
+        newValue = 99;
+      }
+
+      const updatedRating = {...prevState.selectedMovie.ratings, [keyValue]: newValue};
+
+      const updatedMovie = {
+        ...prevState.selectedMovie,
+        ratings: updatedRating
+      };
+
+      const moviesData = prevState.moviesData.map(movie => {
+        if (movie.linkTo === updatedMovie.linkTo) {
+          return updatedMovie
+        }else {
+          return movie
+        }
+      });
+
+      return {
+        moviesData,
+        selectedMovie: updatedMovie
+      }
+    }); 
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -172,60 +243,70 @@ export default class App extends Component {
     }
   }
 
+  componentDidCatch() {
+    localStorage.clear();
+    alert('An error has occurred. The data was cleared...');
+  }
+
   render() {
     const {
-      pageSwitchesItemsData,
       page,
       movieFilter,
-      movieFiltersItemsData,
       moviesData,
       searchValue,
       searchMessageStatus,
       selectedMovie
     } = this.state;
 
+    const Redirection = () => {
+      this.redirectionDone = true;
+
+      if (selectedMovie.linkTo !== null && page === 'details') {
+        return <Redirect to = {`/details/${selectedMovie.linkTo}`}/>
+      }else {
+        return <Redirect to = {`/${page}`}/>
+      }
+    }
+
     return (
       <Router>
         <div className = 'app'>
           <Header 
             page = {page}
-            itemsData = {pageSwitchesItemsData}
             onSwitch = {this.onSwitch}
           />
 
+          {!this.redirectionDone ? <Redirection/> : null}
+
           <Switch>
-            <Route path="/searching">
+            <Route path = "/searching">
               <SearchPanel
                 searchValue = {searchValue}
                 searchMessageStatus = {searchMessageStatus}
-                onChangeValue = {this.onChangeValue}
+                onSwitch = {this.onSwitch}
                 onSearchMovie = {this.onSearchMovie}
                 selectedMovie = {selectedMovie}
                 onCheckDetails = {this.onCheckDetails}
               />
             </Route>
-            <Route path = {`/${selectedMovie.linkTo}`}>
-              {
-                (selectedMovie.linkTo.length > 0)
-                ? <MovieDetails 
-                    movieData = {selectedMovie}
-                    statuses = {selectedMovie.statuses}
-                    onSwitchMovieStatus = {this.onSwitchMovieStatus}
-                  />
-                : <>
-                    <MovieFilters
-                      movieFilter = {movieFilter}
-                      itemsData = {movieFiltersItemsData}
-                      onSwitch = {this.onSwitch}
-                    />
+            <Route path = {`/details/${selectedMovie.linkTo}`}>
+              <MovieDetails 
+                movieData = {selectedMovie}
+                onSwitchMovieStatus = {this.onSwitchMovieStatus}
+                onChangeMovieRating = {this.onChangeMovieRating}
+              />
+            </Route>
+            <Route>
+              <MovieFilters
+                movieFilter = {movieFilter}
+                onSwitch = {this.onSwitch}
+              />
 
-                    <MovieItems
-                      moviesData = {moviesData}
-                      movieFilter = {movieFilter}
-                      onCheckDetails = {this.onCheckDetails}
-                    />
-                  </>
-              }
+              <MovieItems
+                moviesData = {moviesData}
+                movieFilter = {movieFilter}
+                onCheckDetails = {this.onCheckDetails}
+              />
             </Route>
           </Switch>
         </div>

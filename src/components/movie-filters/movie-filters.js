@@ -5,13 +5,20 @@ import Container from '../../hoc/container';
 
 import './movie-filters.scss';
 
-const MovieFilters = ({movieFilter, itemsData, onSwitch}) => {
+const MovieFilters = ({movieFilter, onSwitch}) => {
+    const itemsData =  [
+      {text: 'all movies', keyValue: 'all'},
+      {text: 'favorite', keyValue: 'favorite'},
+      {text: 'watched', keyValue: 'watched'},
+      {text: 'next to watch', keyValue: 'next'}
+    ];
+
     const items = itemsData.map(data => {
         const {text, keyValue} = data;
 
         return (
             <MovieFiltersItem
-                key = {keyValue + text}
+                key = {keyValue}
                 text = {text}
                 keyValue = {keyValue}
                 active = {movieFilter === keyValue ? true : false}

@@ -10,15 +10,39 @@ const MovieItems = ({moviesData, movieFilter, onCheckDetails}) => {
         return (
             <MovieItem
                 key = {data.Poster}
-                moviesData = {data}
+                movieData = {data}
                 onCheckDetails = {onCheckDetails}
             />
         )
     });
 
     let visibleItems = movieFilter === 'all' ? items : items.filter(item => {
-        return item.props.moviesData.statuses.find(status => status.keyValue === movieFilter).status
+        return item.props.movieData.statuses.find(status => status.keyValue === movieFilter).status
     });
+
+    if (movieFilter === 'watched') {
+        visibleItems = visibleItems.sort((a, b) => {
+            const _a = +a.props.movieData.Released.slice(-4);
+            const _b = +b.props.movieData.Released.slice(-4);
+
+            if (_a < _b) {
+                return 1;
+            }else {
+                return -1;
+            }
+        });
+    }else if(movieFilter === 'favorite' || movieFilter === 'next') {
+        visibleItems.sort((a, b) => {
+            const _a = +a.props.movieData.ratings[movieFilter];
+            const _b = +b.props.movieData.ratings[movieFilter];
+
+            if (_a < _b) {
+                return -1;
+            }else {
+                return 1;
+            }
+        });
+    }
 
     if (visibleItems.length === 0) {
         visibleItems = (

@@ -4,13 +4,18 @@ import PageSwitchesItem from '../page-switches-item/page-switches-item';
 
 import './page-switches.scss';
 
-const PageSwitches = ({itemsData, page, onSwitch}) => {
+const PageSwitches = ({page, onSwitch}) => {
+    const itemsData = [
+      {text: 'main page', keyValue: ''},
+      {text: 'find a movie', keyValue: 'searching'}
+    ];
+
     const items = itemsData.map(data => {
         const {text, keyValue} = data;
 
         return (
             <PageSwitchesItem
-                key = {keyValue + text}
+                key = {text}
                 text = {text}
                 active = {keyValue === page ? true : false}
                 keyValue = {keyValue}

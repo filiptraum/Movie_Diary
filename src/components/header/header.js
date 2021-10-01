@@ -4,7 +4,7 @@ import PageSwitches from '../page-switches/page-switches';
 
 import './header.scss';
 
-const Header = ({page, itemsData, onSwitch}) => {
+const Header = ({page, onSwitch}) => {
     return (
         <header className = 'header'>
             <div className = 'container'>
@@ -13,7 +13,6 @@ const Header = ({page, itemsData, onSwitch}) => {
 
                     <PageSwitches 
                         page = {page}
-                        itemsData = {itemsData}
                         onSwitch = {onSwitch}
                     />
                 </div>
