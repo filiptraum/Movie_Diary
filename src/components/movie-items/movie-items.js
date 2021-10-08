@@ -1,5 +1,9 @@
 import React from 'react';
 
+import {connect} from 'react-redux';
+
+import {onCheckDetails} from '../../actions/';
+
 import MovieItem from '../movie-item/movie-item';
 import Container from '../hoc/container';
 
@@ -67,4 +71,15 @@ const MovieItems = ({moviesData, movieFilter, onCheckDetails}) => {
     )
 }
 
-export default MovieItems;
+const mapStateToProps = ({moviesData, movieFilter}) => {
+  return {
+    moviesData,
+    movieFilter
+  }
+}
+
+const mapDispatchToProps = {
+  onCheckDetails
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(MovieItems);

@@ -1,11 +1,17 @@
 import React from 'react';
 
+import {connect} from 'react-redux';
+
+import {onSwitch, onSearchMovie, onCheckDetails} from '../../actions/';
+
 import MovieItem from '../movie-item/movie-item';
 import Container from '../hoc/container';
 
+import MovieAPI from '../../api/movieAPI';
+
 import './search-panel.scss';
 
-const SearchPanel = ({searchValue, onSwitch, onSearchMovie, selectedMovie, onCheckDetails, searchMessageStatus}) => {
+const SearchPanel = ({searchValue, onSwitch, onSearchMovie, selectedMovie, searchMessageStatus, onCheckDetails}) => {
     return (
         <Container classNames = 'searchPanel'>
             <div className = 'block'>
@@ -13,18 +19,15 @@ const SearchPanel = ({searchValue, onSwitch, onSearchMovie, selectedMovie, onChe
                     type = 'text'
                     placeholder = 'Movie name...'
                     value = {searchValue}
-                    onChange = {e => { onSwitch('searchValue', e.target.value) }}
+                    onChange = {e => onSwitch('searchValue', e.target.value)}
                 />
-                <button onClick = {onSearchMovie}>Search</button>
+                <button onClick = {() => onSearchMovie(new MovieAPI(), searchValue)}>Search</button>
             </div>
 
             <div className = 'box'>
                 {
                     (selectedMovie.linkTo !== null)
-                    ? <MovieItem 
-                        movieData = {selectedMovie}
-                        onCheckDetails = {onCheckDetails}
-                    />
+                    ? <MovieItem movieData = {selectedMovie} onCheckDetails = {onCheckDetails}/>
                     : <p>{searchMessageStatus}</p>
                 }
             </div>
@@ -32,4 +35,18 @@ const SearchPanel = ({searchValue, onSwitch, onSearchMovie, selectedMovie, onChe
     )
 }
 
-export default SearchPanel;
+const mapStateToProps = ({searchValue, selectedMovie, searchMessageStatus}) => {
+  return {
+    searchValue,
+    selectedMovie,
+    searchMessageStatus
+  }
+}
+
+const mapDispatchToProps = {
+  onSwitch,
+  onSearchMovie,
+  onCheckDetails
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(SearchPanel);

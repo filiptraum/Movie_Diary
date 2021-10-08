@@ -4,17 +4,14 @@ import PageSwitches from '../page-switches/page-switches';
 
 import './header.scss';
 
-const Header = ({page, onSwitch}) => {
+const Header = () => {
     return (
         <header className = 'header'>
             <div className = 'container'>
                 <div className = 'content'>
                     <h1>Movie Diary</h1>
 
-                    <PageSwitches 
-                        page = {page}
-                        onSwitch = {onSwitch}
-                    />
+                    <PageSwitches/>
                 </div>
             </div>
         </header>

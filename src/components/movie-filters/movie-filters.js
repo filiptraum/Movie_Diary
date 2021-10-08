@@ -1,5 +1,9 @@
 import React from 'react';
 
+import {connect} from 'react-redux';
+
+import {onSwitch} from '../../actions/';
+
 import MovieFiltersItem from '../movie-filters-item/movie-filters-item';
 import Container from '../hoc/container';
 
@@ -21,7 +25,7 @@ const MovieFilters = ({movieFilter, onSwitch}) => {
                 key = {keyValue}
                 text = {text}
                 keyValue = {keyValue}
-                active = {movieFilter === keyValue ? true : false}
+                active = {movieFilter === keyValue}
                 onSwitch = {onSwitch}
             />
         )
@@ -34,4 +38,14 @@ const MovieFilters = ({movieFilter, onSwitch}) => {
     )
 }
 
-export default MovieFilters;
+const mapStateToProps = ({movieFilter}) => {
+  return {
+    movieFilter
+  }
+}
+
+const mapDispatchToProps = {
+  onSwitch
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(MovieFilters);

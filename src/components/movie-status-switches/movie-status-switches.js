@@ -4,7 +4,7 @@ import MovieStatusSwitchesItem from '../movie-status-switches-item/movie-status-
 
 import './movie-status-switches.scss';
 
-const MovieStatusSwitches = ({statuses, onSwitchMovieStatus, ratings, onChangeMovieRating}) => {
+const MovieStatusSwitches = ({statuses, ratings}) => {
     const items = statuses.map(data => {
         const {keyValue, text, status} = data;
 
@@ -14,9 +14,7 @@ const MovieStatusSwitches = ({statuses, onSwitchMovieStatus, ratings, onChangeMo
                 keyValue = {keyValue}
                 text = {text}
                 status = {status}
-                onSwitchMovieStatus = {onSwitchMovieStatus}
                 ratings = {ratings}
-                onChangeMovieRating = {onChangeMovieRating}
             />
         )
     });

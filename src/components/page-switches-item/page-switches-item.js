@@ -8,7 +8,7 @@ const PageSwitchesItem = ({text, active, onSwitch, keyValue}) => {
         <Link
             to = {`/${keyValue}`}
             className = {active ? 'item active' : 'item'}
-            onClick = {() => { onSwitch('page', keyValue) }}
+            onClick = {() => onSwitch('page', keyValue)}
         >{text}</Link>
     )
 }

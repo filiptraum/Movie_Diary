@@ -1,5 +1,9 @@
 import React from 'react';
 
+import {connect} from 'react-redux';
+
+import {onSwitch} from '../../actions/';
+
 import PageSwitchesItem from '../page-switches-item/page-switches-item';
 
 import './page-switches.scss';
@@ -17,7 +21,7 @@ const PageSwitches = ({page, onSwitch}) => {
             <PageSwitchesItem
                 key = {text}
                 text = {text}
-                active = {keyValue === page ? true : false}
+                active = {keyValue === page}
                 keyValue = {keyValue}
                 onSwitch = {onSwitch}
             />
@@ -27,4 +31,14 @@ const PageSwitches = ({page, onSwitch}) => {
     return <div className = 'pageSwitches'>{items}</div>;
 }
 
-export default PageSwitches;
+const mapStateToProps = ({page}) => {
+  return {
+    page
+  }
+}
+
+const mapDispatchToProps = {
+  onSwitch
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(PageSwitches);

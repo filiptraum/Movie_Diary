@@ -6,7 +6,7 @@ const MovieFiltersItem = ({text, active, keyValue, onSwitch}) => {
     return (
         <button
             className = {active ? 'item active' : 'item'}
-            onClick = {() => {onSwitch('movieFilter', keyValue)}}
+            onClick = {() => onSwitch('movieFilter', keyValue)}
         >{text}</button>
     )
 }

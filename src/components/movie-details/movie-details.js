@@ -5,8 +5,8 @@ import Container from '../hoc/container';
 
 import './movie-details.scss';
 
-const MovieDetails = ({movieData, onSwitchMovieStatus, onChangeMovieRating}) => {
-    const {Poster, statuses, ratings} = movieData;
+const MovieDetails = ({selectedMovie}) => {
+    const {Poster, statuses, ratings} = selectedMovie;
 
     let keys = [
         'Title',
@@ -24,10 +24,10 @@ const MovieDetails = ({movieData, onSwitchMovieStatus, onChangeMovieRating}) => 
     for (let index = 0; index < keys.length; index++) {
         rightContent.push(
             <div
-            key = {keys[index] + movieData[keys[index]]}
+            key = {keys[index] + selectedMovie[keys[index]]}
             className = 'box'>
                 <b>{keys[index]}: </b>
-                <p>{movieData[keys[index]]};</p>
+                <p>{selectedMovie[keys[index]]};</p>
             </div>
         );
     }
@@ -49,9 +49,7 @@ const MovieDetails = ({movieData, onSwitchMovieStatus, onChangeMovieRating}) => 
                     
             <MovieStatusSwitches
                 statuses = {statuses}
-                onSwitchMovieStatus = {onSwitchMovieStatus}
                 ratings = {ratings}
-                onChangeMovieRating = {onChangeMovieRating}
             />
         </Container>
     );

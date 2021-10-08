@@ -1,6 +1,10 @@
 import React from 'react';
 import {Link} from "react-router-dom";
 
+import {connect} from 'react-redux';
+
+import {onSwitchMovieStatus, onChangeMovieRating} from '../../actions/';
+
 import './movie-status-switches-item.scss';
 
 const MovieStatusSwitchesItem = ({keyValue, text, status, onSwitchMovieStatus, ratings, onChangeMovieRating}) => {
@@ -30,18 +34,18 @@ const MovieStatusSwitchesItem = ({keyValue, text, status, onSwitchMovieStatus, r
             <div className = 'rating'>
                 <button
                     className = {rating > 1 ? '' : 'disabled'}
-                    onClick = {() => {onChangeMovieRating(keyValue, (rating - 1))}}
+                    onClick = {() => onChangeMovieRating(keyValue, (rating - 1))}
                 >—</button>
 
                 <input
                     type = 'number'
                     value = {rating}
-                    onChange = {(e) => {onChangeMovieRating(keyValue, +e.target.value)}}
+                    onChange = {e => onChangeMovieRating(keyValue, +e.target.value)}
                 />
 
                 <button
                     className = {rating < 99 ? '' : 'disabled'}
-                    onClick = {() => {onChangeMovieRating(keyValue, (rating + 1))}}
+                    onClick = {() => onChangeMovieRating(keyValue, (rating + 1))}
                 >+</button>
             </div>
         );
@@ -55,4 +59,9 @@ const MovieStatusSwitchesItem = ({keyValue, text, status, onSwitchMovieStatus, r
     );
 }
 
-export default MovieStatusSwitchesItem;
+const mapDispatchToProps = {
+  onSwitchMovieStatus,
+  onChangeMovieRating
+}
+
+export default connect(() => ({}), mapDispatchToProps)(MovieStatusSwitchesItem);
