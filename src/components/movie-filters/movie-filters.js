@@ -1,7 +1,7 @@
 import React from 'react';
 
 import MovieFiltersItem from '../movie-filters-item/movie-filters-item';
-import Container from '../../hoc/container';
+import Container from '../hoc/container';
 
 import './movie-filters.scss';
 

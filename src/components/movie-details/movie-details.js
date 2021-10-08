@@ -1,7 +1,7 @@
 import React from 'react';
 
 import MovieStatusSwitches from '../movie-status-switches/movie-status-switches';
-import Container from '../../hoc/container';
+import Container from '../hoc/container';
 
 import './movie-details.scss';
 

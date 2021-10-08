@@ -12,38 +12,45 @@ import MovieAPI from '../../api/movieAPI';
 
 import './app.scss';
 
+const checkLocalStorage = keyValue => {
+  return localStorage.hasOwnProperty('movieDiary') ? JSON.parse(localStorage.getItem('movieDiary'))[keyValue] : undefined;
+}
+
 export default class App extends Component {
   state = {
-    page: JSON.parse(localStorage.getItem('state')) ? JSON.parse(localStorage.getItem('state')).page : '',
+    page: checkLocalStorage('page') || '',
 
     movieFilter: 'all',
 
-    moviesData: JSON.parse(localStorage.getItem('state')) ? JSON.parse(localStorage.getItem('state')).moviesData : [],
+    moviesData: checkLocalStorage('moviesData') || [],
 
-    searchValue: JSON.parse(localStorage.getItem('state')) ? JSON.parse(localStorage.getItem('state')).searchValue : '',
-    searchMessageStatus: JSON.parse(localStorage.getItem('state'))
-                         ? JSON.parse(localStorage.getItem('state')).searchMessageStatus : 'Enter the name of the movie...',
+    searchValue: checkLocalStorage('searchValue') || '',
+    searchMessageStatus: checkLocalStorage('searchMessageStatus') || 'Enter the name of the movie...',
     
-    selectedMovie: JSON.parse(localStorage.getItem('state')) ? JSON.parse(localStorage.getItem('state')).selectedMovie : {linkTo: null}
+    selectedMovie: checkLocalStorage('selectedMovie') || {linkTo: null}
   }
 
   redirectionDone = false;
 
   onSwitch = (keyValue, value) => {
     this.setState(prevState => {
-      if (keyValue === 'page') {
-        return {
-          [keyValue]: value,
-          selectedMovie: {linkTo: null},
-          searchValue: '',
-          searchMessageStatus: 'Enter the name of the movie...'
-        }
-      }else if ((keyValue === 'searchValue') || (keyValue === 'movieFilter')) {
-        return {
-          [keyValue]: value
-        }
-      }else {
-        return prevState
+      switch (keyValue) {
+        case 'page':
+          return {
+            [keyValue]: value,
+            selectedMovie: {linkTo: null},
+            searchValue: '',
+            searchMessageStatus: 'Enter the name of the movie...'
+          }
+
+        case 'searchValue':
+        case 'movieFilter':
+          return {
+            [keyValue]: value
+          }
+      
+        default:
+          return prevState
       }
     });
   }
@@ -60,7 +67,7 @@ export default class App extends Component {
         .then(data => {
           if (data.Response === 'True') {
             this.setState(prevState => {
-              const isMovieSelected = prevState.moviesData.find(movie => movie.Poster === data.Poster);
+              const isMovieSelected = prevState.moviesData.find(({Poster}) => Poster === data.Poster);
 
               if (isMovieSelected === undefined) {
                 const {
@@ -89,18 +96,18 @@ export default class App extends Component {
 
                 const linkTo = movieAPI.transformToCorrectData(Title.toLowerCase(), '_');
 
-                const calcLengthByKeyFromMoviesData = key => {
-                  return (this.state.moviesData.filter(item => {
-                    return item.statuses.find(status => status.keyValue === key).status
-                }).length + 1);
-  }
+                const countTheActivityOfTheRating = key => {
+                  return (this.state.moviesData.filter(({statuses}) => {
+                    return statuses.find(({keyValue}) => keyValue === key).status
+                  }).length + 1);
+                }
 
                 const newMovie = {
                   ...movieData,
                   linkTo,
                   ratings: {
-                    favorite: calcLengthByKeyFromMoviesData('favorite'),
-                    next: calcLengthByKeyFromMoviesData('next')
+                    favorite: countTheActivityOfTheRating('favorite'),
+                    next: countTheActivityOfTheRating('next')
                   },
                   statuses: [
                     {text: 'favorite', keyValue: 'favorite', status: false},
@@ -110,13 +117,9 @@ export default class App extends Component {
                   ]
                 };
 
-                return {
-                  selectedMovie: newMovie
-                }
+                return {selectedMovie: newMovie}
               }else {
-                return {
-                  selectedMovie: isMovieSelected
-                }
+                return {selectedMovie: isMovieSelected}
               }
             });
           }else {
@@ -126,17 +129,15 @@ export default class App extends Component {
           }
         });
     }else {
-      this.setState({
-        searchMessageStatus: 'You haven\'t entered anything!...'
-      });
+      this.setState({searchMessageStatus: 'You haven\'t entered anything!...'});
     }
   }
 
-  onCheckDetails = linkTo => {
+  onCheckDetails = activeLinkTo => {
     document.body.scrollTop = document.documentElement.scrollTop = 0;
 
     this.setState(prevState => {
-      const isMovieSelected = this.state.moviesData.find(movie => movie.linkTo === linkTo);
+      const isMovieSelected = this.state.moviesData.find(({linkTo}) => linkTo === activeLinkTo);
 
       if (isMovieSelected === undefined) {
           return {
@@ -155,83 +156,75 @@ export default class App extends Component {
     });
   }
 
+  updateMovieData = (state, item, index) => {
+    if (item === null) {
+      return [
+        ...state.slice(0, index),
+        ...state.slice(index + 1)
+      ]
+    }
+
+    return [
+      ...state.slice(0, index),
+      item,
+      ...state.slice(index + 1)
+    ]
+  }
+
   onSwitchMovieStatus = (keyValue, status) => {
-    if (keyValue !== 'delete') {
-      this.setState(prevState => {
-        const updatedStatuses = prevState.selectedMovie.statuses.map(statusItem => {
-          if (statusItem.keyValue === keyValue) {
-            return {...statusItem, status}
-          }else {
-            return statusItem
-          }
-        });
+    this.setState(prevState => {
+      const {moviesData, selectedMovie} = prevState;
+      const {statuses} = selectedMovie;
+      
+      const statusIndex = statuses.findIndex(status => status.keyValue === keyValue);
+      const updatedStatus = {...statuses[statusIndex], status};
+      const updatedStatuses = this.updateMovieData(statuses, updatedStatus, statusIndex);
+      
+      const updatedMovie = {
+        ...selectedMovie,
+        statuses: updatedStatuses
+      };
 
-        const updatedMovie = {
-          ...prevState.selectedMovie,
-          statuses: [
-            ...updatedStatuses
-          ]
-        };
+      const movieIndex = moviesData.findIndex(({linkTo}) => linkTo === updatedMovie.linkTo);
 
-        const moviesData = prevState.moviesData.map(movie => {
-          if (movie.linkTo === updatedMovie.linkTo) {
-            return updatedMovie
-          }else {
-            return movie
-          }
-        });
-
+      if (keyValue !== 'delete') {
         return {
-          moviesData,
+          moviesData: this.updateMovieData(moviesData, updatedMovie, movieIndex),
           selectedMovie: updatedMovie
-        }
-      }); 
-    }else {
-      this.setState(prevState => {
-        const moviesData = prevState.moviesData.map(movie => {
-          if (prevState.selectedMovie.linkTo === movie.linkTo) {
-            return {linkTo: ''}
-          } else {
-            return movie
-          }
-        }).filter(movie => movie.linkTo.length > 0);
-
+        } 
+      }else {
         return {
-          moviesData,
+          moviesData: this.updateMovieData(moviesData, null, movieIndex),
           page: '',
           selectedMovie: {linkTo: null}
         }
-      });
-    }
+      }
+    }); 
   }
 
-  onChangeMovieRating = (keyValue, value) => {
+  onChangeMovieRating = (keyValue, newValue) => {
     this.setState(prevState => {
-      let newValue = value;
+      let value = newValue;
 
-      if (value <= 0) {
-        newValue = 1;
-      }else if(value >= 100) {
-        newValue = 99;
+      if (newValue <= 0) {
+        value = 1;
+      }else if(newValue >= 100) {
+        value = 99;
       }
 
-      const updatedRating = {...prevState.selectedMovie.ratings, [keyValue]: newValue};
+      const {moviesData, selectedMovie} = prevState;
+
+      const updatedRatings = {...selectedMovie.ratings, [keyValue]: value};
 
       const updatedMovie = {
-        ...prevState.selectedMovie,
-        ratings: updatedRating
+        ...selectedMovie,
+        ratings: updatedRatings
       };
 
-      const moviesData = prevState.moviesData.map(movie => {
-        if (movie.linkTo === updatedMovie.linkTo) {
-          return updatedMovie
-        }else {
-          return movie
-        }
-      });
+      const movieIndex = moviesData.findIndex(({linkTo}) => linkTo === updatedMovie.linkTo);
 
       return {
-        moviesData,
+        moviesData: this.updateMovieData(moviesData, updatedMovie, movieIndex),
         selectedMovie: updatedMovie
       }
     }); 
@@ -239,13 +232,8 @@ export default class App extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.movieFilter === this.state.movieFilter) {
-      localStorage.setItem('state', JSON.stringify(this.state));
+      localStorage.setItem('movieDiary', JSON.stringify(this.state));
     }
-  }
-
-  componentDidCatch() {
-    localStorage.clear();
-    alert('An error has occurred. The data was cleared...');
   }
 
   render() {

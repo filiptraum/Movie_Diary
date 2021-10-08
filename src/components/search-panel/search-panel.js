@@ -1,7 +1,7 @@
 import React from 'react';
 
 import MovieItem from '../movie-item/movie-item';
-import Container from '../../hoc/container';
+import Container from '../hoc/container';
 
 import './search-panel.scss';
 
